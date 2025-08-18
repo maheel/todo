@@ -1,4 +1,4 @@
-# Getting Started with Create React App
+# TODO App
 
 This project now uses a monorepo structure:
 
