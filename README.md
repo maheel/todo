@@ -6,6 +6,10 @@ This project now uses a monorepo structure:
 - **Backend API (Node/Express):** in `src/backend/server.js`, start with `npm run start:api`
 - **Start both:** `npm run start:all`
 
+## Start MongoDB locally with Docker
+
+### `docker-compose up -d`
+
 ## Available Scripts
 
 In the project directory, you can run:
