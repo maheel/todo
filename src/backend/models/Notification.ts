@@ -1,12 +1,10 @@
-import { Schema, model } from "mongoose";
+import { ObjectId } from "mongodb";
 
-const notificationSchema = new Schema(
-  {
-    message: { type: String, required: true, trim: true },
-    read: { type: Boolean, default: false },
-    createdAt: { type: Date, default: Date.now },
-  },
-  { timestamps: false }
-);
+export interface Notification {
+  _id?: ObjectId;
+  message: string;
+  read: boolean;
+  createdAt: Date;
+}
 
-export const NotificationModel = model("Notification", notificationSchema);
+export const NOTIFICATIONS_COLLECTION = "notifications";

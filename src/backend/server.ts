@@ -1,6 +1,6 @@
 import http from "http";
 import { createApp } from "./app";
-import { connectDB } from "./config/db";
+import { connectToDatabase, closeDatabaseConnection } from "./utils/database";
 import { initIO } from "./sockets/io";
 import { notificationService } from "./services/notificationService";
 import { config } from "./config/env";
@@ -8,7 +8,7 @@ import { registerTodoCreatedSubscriber } from "./events/subscribers/todoCreatedS
 import { registerEventBridgeForwarder } from "./events/subscribers/eventBridgeForwarder";
 
 async function bootstrap() {
-  await connectDB();
+  await connectToDatabase();
 
   registerTodoCreatedSubscriber();
   registerEventBridgeForwarder();
@@ -33,6 +33,12 @@ async function bootstrap() {
   server.listen(config.port, () => {
     // eslint-disable-next-line no-console
     console.log(`Server running on port ${config.port}`);
+  });
+
+  process.on('SIGINT', async () => {
+    console.log('Shutting down server...');
+    await closeDatabaseConnection();
+    process.exit(0);
   });
 }
 

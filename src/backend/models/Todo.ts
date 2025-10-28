@@ -1,11 +1,11 @@
-import { Schema, model } from "mongoose";
+import { ObjectId } from "mongodb";
 
-const todoSchema = new Schema(
-  {
-    text: { type: String, required: true, trim: true },
-    completed: { type: Boolean, default: false },
-  },
-  { timestamps: true }
-);
+export interface Todo {
+  _id?: ObjectId;
+  text: string;
+  completed: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
 
-export const TodoModel = model("Todo", todoSchema);
+export const TODOS_COLLECTION = "todos";
