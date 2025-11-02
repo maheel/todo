@@ -1,5 +1,7 @@
 import { Collection, Db, ObjectId } from "mongodb";
 import { Todo, TODOS_COLLECTION } from "../models/Todo";
+import { getMongoClient } from "../utils/database";
+import { outboxRepository } from "./outboxRepository";
 
 let todosCollection: Collection<Todo>;
 
@@ -17,16 +19,47 @@ export const todoRepository = {
   },
 
   create: async (payload: { text: string }) => {
-    const now = new Date();
-    const newTodo: Todo = {
-      text: payload.text,
-      completed: false,
-      createdAt: now,
-      updatedAt: now
-    };
+    const client = getMongoClient();
+    const session = client.startSession();
 
-    const result = await todosCollection.insertOne(newTodo);
-    return { ...newTodo, _id: result.insertedId };
+    try {
+      let createdTodo: Todo & { _id: ObjectId };
+
+      await session.withTransaction(async () => {
+        const now = new Date();
+        const newTodo: Todo = {
+          text: payload.text,
+          completed: false,
+          createdAt: now,
+          updatedAt: now
+        };
+
+        const result = await todosCollection.insertOne(newTodo, { session });
+        createdTodo = { ...newTodo, _id: result.insertedId };
+
+        // Create outbox event for todo creation
+        const outboxEvent = {
+          eventType: 'TodoCreated',
+          aggregateType: 'Todo',
+          aggregateId: result.insertedId.toString(),
+          payload: {
+            text: newTodo.text,
+            completed: newTodo.completed,
+            createdAt: newTodo.createdAt,
+            updatedAt: newTodo.updatedAt
+          },
+          status: 'PENDING' as const,
+          createdAt: now,
+          retryCount: 0
+        };
+
+        await outboxRepository.create(outboxEvent, session);
+      });
+
+      return createdTodo!;
+    } finally {
+      await session.endSession();
+    }
   },
 
   updateCompleted: async (id: string, completed: boolean) => {
