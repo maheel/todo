@@ -37,3 +37,12 @@ Builds the app for production to the `build` folder.
 ### `npm run eject`
 
 **Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+
+
+Add thest to the host file
+
+nano /etc/hosts
+
+127.0.0.1 mongo1
+127.0.0.1 mongo2
+127.0.0.1 mongo3
